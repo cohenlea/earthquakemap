@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+<head>
+    
+<!-- All earthquakes around the world in the last 30 days with magnitude > 4.5
+Lea Cohen
+19 January 2017 -->
+
+<!-- Adding in the Leaflet CSS file -->
+<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css"/>
+<script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+<script src="leaflet-providers.js"></script>
+
+<!-- Adding Leaflet JavaScript file -->
+<script src="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.js"></script>
+
+<!-- Adding styling info for the map -->
+<style type="text/css">
+#map { height: 760px; }
+</style>
+
+</head>
+
+<body>
+
+
+<!-- Creating the map div -->
+<div id="map"></div>
+
+<!-- The JavaScript that's powering the map -->
+<script>
+
+// Initialize the map
+var map = L.map('map').setView([-2.0, -30.0], 2);
+
+// Add tiles for basemap
+    L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+     attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+     }).addTo(map);
+
+
+// add geoJson from the USGS site with ajax
+function addDataToMap(data, map) {
+	var dataLayer = L.geoJson(data);
+	dataLayer.addTo(map);
+}
+
+$.getJSON("http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_month.geojson", function(data) { addDataToMap(data, map); });
+
+function addDataToMap(data, map) {
+    var dataLayer = L.geoJson(data, {
+        onEachFeature: function(feature, layer) {
+            var popupText = "Magnitude: " + feature.properties.mag
+                + "<br>Location: " + feature.properties.place
+                + "<br><a href='" + feature.properties.url + "'>More info</a>";
+            layer.bindPopup(popupText); }
+        });
+    dataLayer.addTo(map);
+}
+
+
+</script>
+
+ <h4 style = 'padding:2px;margin:2px;position:fixed;top:10px;left:50px;'>Earthquakes with 4.5+ magnitude in the <br>last 30 days. Data updated every 15 minutes.</h4>
+
+</body>
+</html>
+
+
+
