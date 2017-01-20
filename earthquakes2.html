@@ -15,9 +15,36 @@ Lea Cohen
 <!-- Adding Leaflet JavaScript file -->
 <script src="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.js"></script>
 
-<!-- Adding styling info for the map -->
+<!-- Adding styling info for the map and buttons -->
 <style type="text/css">
 #map { height: 760px; }
+button {
+   background: #65a9d7;
+   padding: 4px 8px;
+   -webkit-border-radius: 8px;
+   -moz-border-radius: 8px;
+   border-radius: 8px;
+   color: white;
+   font-size: 14px;
+   text-decoration: none;
+   vertical-align: middle;
+   margin:2px;
+   display: inline-block;
+   }
+button:hover {
+   background: #28597a;
+   }
+button:active {
+   background: #1b435e;
+   }
+.container {
+    left: 50px;
+    top: 60px;
+    position: fixed;
+    text-align: center;
+}
+h4 {padding:2px;margin:2px;position:fixed;top:10px;left:50px;}
+
 </style>
 
 </head>
@@ -32,24 +59,23 @@ Lea Cohen
 <script>
 
 // Initialize the map
-var map = L.map('map').setView([-2.0, -30.0], 2);
+var map = L.map('map').setView([-2.0, -10.0], 2);
 
 // Add tiles for basemap
-    L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+    L.tileLayer('http://{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png', {
      attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
      }).addTo(map);
 
 
-// add geoJson from the USGS site with ajax
-function addDataToMap(data, map) {
-	var dataLayer = L.geoJson(data);
-	dataLayer.addTo(map);
-}
+// declare dataLayer as a global variable in order to use .clearLayers() before data is loaded
+var dataLayer;
 
+// add geoJson from the USGS site with ajax
 $.getJSON("http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_month.geojson", function(data) { addDataToMap(data, map); });
 
 function addDataToMap(data, map) {
-    var dataLayer = L.geoJson(data, {
+    if (dataLayer) dataLayer.clearLayers();
+    dataLayer = L.geoJson(data, {
         onEachFeature: function(feature, layer) {
             var popupText = "Magnitude: " + feature.properties.mag
                 + "<br>Location: " + feature.properties.place
@@ -59,10 +85,33 @@ function addDataToMap(data, map) {
     dataLayer.addTo(map);
 }
 
+// load the different geojson files from USGS
+$(document).ready(function() {
+    $("#month").click(function(){
+
+        $.getJSON("http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_month.geojson", function(data) { addDataToMap(data, map); });
+    });
+
+       $("#week").click(function(){
+
+        $.getJSON("http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_week.geojson", function(data) { addDataToMap(data, map); });
+    });
+    $("#day").click(function(){
+
+        $.getJSON("http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson", function(data) { addDataToMap(data, map); });
+    });
+});
 
 </script>
 
- <h4 style = 'padding:2px;margin:2px;position:fixed;top:10px;left:50px;'>Earthquakes with 4.5+ magnitude in the <br>last 30 days. Data updated every 15 minutes.</h4>
+ <h4>Earthquakes with 4.5+ magnitude.<br>USGS data updated every 15 minutes.</h4>
+ 
+<div class="container">
+ <button id = "day" type = "button">Last 24 Hours</button>
+ <button id = "week" type = "button">Last Week</button>
+ <button id = "month" type = "button">Last 30 Days</button>
+</div>
+
 
 </body>
 </html>
